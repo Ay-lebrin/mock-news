@@ -1,9 +1,23 @@
-# Skaet News API (mock) — replacement for the expired mockapi.io endpoint
+# Skaet News API (mock)
 
-This is a small Express server that replicates every endpoint from the
-Frontend Intern assessment brief, so candidates have a working API to build
-against. Data lives in memory and resets whenever the server restarts —
-that's expected for a test API.
+## About
+
+The News API originally provided in the Frontend Intern assessment
+(hosted on mockapi.io) has expired, so this project is a free, drop-in
+replacement. It's a small Express server that implements the exact same
+endpoints, request/response shapes, and sample data described in the
+assessment brief — so candidates can keep working against a live API
+without any change to the task itself.
+
+It's built to be genuinely useful for testing, not just a stub:
+- Seed data includes deliberate edge cases (a news item with no images or
+  comments, a broken image URL, a comment with no avatar) so candidates can
+  actually exercise the empty/error-state handling the assessment asks for.
+- An optional `?fail=1` query param forces a 500 response on demand, so
+  loading/error/retry states can be tested without waiting for a real
+  failure.
+- Data lives in memory and resets on restart — expected behavior for a
+  test API, not a bug.
 
 ## Endpoints
 
@@ -25,14 +39,6 @@ Base URL once running: `http://localhost:3000` (or your deployed URL)
 | PUT | `/news/:id/comments/:commentId` | Edit comment on a news item |
 | DELETE | `/news/:id/comments/:commentId` | Delete comment on news item |
 
-Seed data includes 5 news items, one with no images/comments (for empty-state
-testing), one intentionally broken image URL (for broken-image handling),
-and one comment with no avatar.
-
-**Bonus:** add `?fail=1` to any GET request on `/news` or `/news/:id/...` to
-force a `500` response — handy for testing loading/error/retry states without
-waiting for a real failure.
-
 ## Run it locally (no cost, no deployment needed)
 
 ```bash
@@ -46,23 +52,29 @@ while developing.
 
 ## Deploy it for free (so it has a public URL like the old one)
 
-Any of these work well for a small Node/Express app and have a free tier:
+**Recommended: Render.com.** For a small always-on-ish Express app like this
+one, it's the best free option right now — no credit card required, deploys
+straight from a GitHub repo, and the free tier is generous enough for an
+assessment API that a handful of candidates will hit occasionally. The one
+tradeoff is that a free service spins down after ~15 minutes of inactivity,
+so the first request after a quiet period takes 20-30 seconds to wake up —
+worth a one-line note in the assessment doc so candidates aren't confused by
+it.
 
-**Render.com** (recommended, simplest)
 1. Push this folder to a GitHub repo.
 2. On [render.com](https://render.com), click **New → Web Service**, connect
    the repo.
 3. Build command: `npm install` — Start command: `npm start`.
 4. Deploy. Render gives you a public URL like `https://your-app.onrender.com`.
-   (Free tier spins down after inactivity — the first request after a while
-   takes a few seconds to wake up, which is fine for an assessment API.)
 
-**Glitch.com**
-1. Create a new Node.js project on Glitch and paste in `server.js` and
-   `package.json`.
-2. Glitch gives you an instant public URL, no separate deploy step.
-
-**Railway.app / Cyclic.sh** work the same way as Render if you prefer them.
+**Alternatives, if the cold-start delay is a dealbreaker:**
+- **Glitch.com** — instant public URL, no separate deploy step, but its free
+  tier now requires the project to be "boosted" periodically to stay awake,
+  which is more upkeep than Render for something you'll set up once.
+- **Railway.app** — free trial credit rather than an ongoing free tier, so
+  it's fine short-term but not a lasting free option.
+- **Cyclic.sh** — genuinely free and no sleep/cold-start, but smaller
+  community and less long-term certainty as a platform.
 
 Once deployed, swap the old `API Base URL` in the assessment doc for your
 new public URL.
