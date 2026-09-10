@@ -1,0 +1,16 @@
+{
+  "name": "skaet-news-mock-api",
+  "version": "1.0.0",
+  "description": "Free replacement mock API for the Skaet Frontend Intern assessment (News API)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  }
+}
