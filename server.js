@@ -31,7 +31,7 @@ app.use(express.json());
 // Seed data
 // ---------------------------------------------------------------------------
 
-let nextNewsId = 6;
+let nextNewsId = 56;
 let nextImageId = 4;
 let nextCommentId = 4;
 
@@ -111,6 +111,79 @@ let comments = [
     createdAt: "2026-08-03T13:00:00.000Z",
   },
 ];
+
+// ---------------------------------------------------------------------------
+// Generate 50 more news items (ids 6-55) so pagination has real data to work
+// with. A handful get images/comments attached; most don't, which is
+// realistic and keeps the empty-state paths easy to hit while paging.
+// ---------------------------------------------------------------------------
+
+const SAMPLE_AUTHORS = [
+  "Alan Turing", "Margaret Hamilton", "Katherine Johnson", "Tim Berners-Lee",
+  "Radia Perlman", "Linus Torvalds", "Barbara Liskov", "Dennis Ritchie",
+  "Shafi Goldwasser", "John Carmack", "Anita Borg", "Vint Cerf",
+  "Frances Allen", "Guido van Rossum", "Sophie Wilson",
+];
+
+const SAMPLE_TOPICS = [
+  "APIs", "state management", "accessibility", "browser caching", "CSS grid",
+  "form validation", "component design", "async rendering", "build tools",
+  "testing strategy", "design systems", "performance budgets",
+  "responsive layout", "error boundaries", "data fetching patterns",
+];
+
+const SAMPLE_URLS = [
+  "http://example.com/reads", "http://example.com/dev-notes", "", "",
+  "http://example.com/blog",
+];
+
+function generateMoreNews() {
+  for (let i = 0; i < 50; i++) {
+    const id = String(nextNewsId - 50 + i); // ids 6..55
+    const author = SAMPLE_AUTHORS[i % SAMPLE_AUTHORS.length];
+    const topic = SAMPLE_TOPICS[i % SAMPLE_TOPICS.length];
+    const hasAvatar = i % 4 !== 0; // most have an avatar, some don't
+    const item = {
+      id,
+      author,
+      avatar: hasAvatar ? `https://i.pravatar.cc/150?img=${(i % 70) + 1}` : "",
+      title: `${author.split(" ")[0]}'s take on ${topic} (#${i + 1})`,
+      url: SAMPLE_URLS[i % SAMPLE_URLS.length],
+      createdAt: new Date(2026, 7, 10 + Math.floor(i / 3), 9, i % 60).toISOString(),
+    };
+    news.push(item);
+
+    // Roughly every 3rd item gets one or two images.
+    if (i % 3 === 0) {
+      images.push({
+        id: String(nextImageId++),
+        newsId: id,
+        image: `https://picsum.photos/seed/skaet-gen-${id}-a/800/500`,
+      });
+      if (i % 6 === 0) {
+        images.push({
+          id: String(nextImageId++),
+          newsId: id,
+          image: `https://picsum.photos/seed/skaet-gen-${id}-b/800/500`,
+        });
+      }
+    }
+
+    // Roughly every 4th item gets one or two comments.
+    if (i % 4 === 0) {
+      comments.push({
+        id: String(nextCommentId++),
+        newsId: id,
+        name: SAMPLE_AUTHORS[(i + 3) % SAMPLE_AUTHORS.length],
+        avatar: i % 8 === 0 ? "" : `https://i.pravatar.cc/150?img=${(i % 70) + 20}`,
+        comment: `Great points on ${topic}, thanks for writing this up.`,
+        createdAt: new Date(2026, 7, 10 + Math.floor(i / 3), 12, i % 60).toISOString(),
+      });
+    }
+  }
+}
+
+generateMoreNews();
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -306,5 +379,5 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Skaet mock News API running on http://localhost:${PORT}`);
+  console.log(`News API running on http://localhost:${PORT}`);
 });
