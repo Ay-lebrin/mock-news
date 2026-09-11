@@ -41,6 +41,7 @@ let news = [
     author: "Mr. Bruce Brad",
     avatar: "https://i.pravatar.cc/150?img=12",
     title: "Enterprise-wide eco-maniac core",
+    body: "The latest release reworks the core pipeline end to end, cutting build times nearly in half. Early adopters report smoother deploys and fewer rollbacks, though a handful of edge cases around legacy config files are still being ironed out. The team plans a follow-up post once the migration guide is finalized.",
     url: "http://tiana.com",
     createdAt: "2026-08-01T09:00:00.000Z",
   },
@@ -49,6 +50,7 @@ let news = [
     author: "Ada Lovelace",
     avatar: "https://i.pravatar.cc/150?img=32",
     title: "Analytical Engine gets a JavaScript port",
+    body: "A small group of hobbyists has finished porting the original Analytical Engine instruction set to JavaScript, running entirely in the browser. The project started as a weekend experiment and has since grown into a full simulator with step-by-step execution, making it a surprisingly good teaching tool for anyone curious about how early mechanical computing actually worked.",
     url: "http://example.com/analytical-engine",
     createdAt: "2026-08-03T11:30:00.000Z",
   },
@@ -57,6 +59,7 @@ let news = [
     author: "Grace Hopper",
     avatar: "https://i.pravatar.cc/150?img=45",
     title: "Why every compiler needs a good debugger",
+    body: "A good debugger is often treated as an afterthought, bolted on once the compiler itself is considered 'done'. This piece argues the opposite: debugging support should shape compiler design from day one, because the clarity of your error messages and stack traces determines how quickly developers can actually trust the tool.",
     url: "",
     createdAt: "2026-08-05T15:45:00.000Z",
   },
@@ -65,6 +68,7 @@ let news = [
     author: "Orlo Nitzsche",
     avatar: "",
     title: "Frontend interns wanted: apply within",
+    body: "We're opening a new round of frontend internship positions this quarter. Successful candidates will work directly with the product team on real features, get paired with a mentor, and go through a short onboarding track covering React, Chakra UI, and the internal API conventions before picking up their first ticket.",
     url: "http://example.com/careers",
     createdAt: "2026-08-07T08:15:00.000Z",
   },
@@ -73,6 +77,7 @@ let news = [
     author: "Sample Author With No Extras",
     avatar: "https://i.pravatar.cc/150?img=5",
     title: "A news item with no images or comments (empty-state test)",
+    body: "This item exists purely to test empty states — it has no images and no comments, so your UI should handle both gracefully without breaking the layout or showing a blank space where a message should be.",
     url: "",
     createdAt: "2026-08-09T10:00:00.000Z",
   },
@@ -137,6 +142,14 @@ const SAMPLE_URLS = [
   "http://example.com/blog",
 ];
 
+const BODY_TEMPLATES = [
+  (author, topic) => `${author} walks through a practical approach to ${topic}, drawing on lessons learned from a recent production incident. The piece is light on theory and heavy on concrete examples, making it a quick, useful read for anyone working on similar problems.`,
+  (author, topic) => `In this post, ${author} breaks down common misconceptions about ${topic} and offers a simpler mental model for thinking about the problem. Several readers have already flagged it as required reading for new team members.`,
+  (author, topic) => `A short but detailed look at how ${topic} decisions made early in a project tend to compound over time. ${author} uses a handful of before-and-after examples to show what changed and why it mattered.`,
+  (author, topic) => `${author} shares a set of small, low-risk changes around ${topic} that added up to a meaningful improvement in day-to-day developer experience — nothing flashy, just steady iteration.`,
+  (author, topic) => `This write-up covers what ${author}'s team tried, what failed, and what eventually worked when tackling ${topic} at scale. Worth a read if you're about to make similar tradeoffs.`,
+];
+
 function generateMoreNews() {
   for (let i = 0; i < 50; i++) {
     const id = String(nextNewsId - 50 + i); // ids 6..55
@@ -148,6 +161,7 @@ function generateMoreNews() {
       author,
       avatar: hasAvatar ? `https://i.pravatar.cc/150?img=${(i % 70) + 1}` : "",
       title: `${author.split(" ")[0]}'s take on ${topic} (#${i + 1})`,
+      body: BODY_TEMPLATES[i % BODY_TEMPLATES.length](author, topic),
       url: SAMPLE_URLS[i % SAMPLE_URLS.length],
       createdAt: new Date(2026, 7, 10 + Math.floor(i / 3), 9, i % 60).toISOString(),
     };
@@ -235,7 +249,7 @@ app.get("/news/:id", (req, res) => {
 });
 
 app.post("/news", (req, res) => {
-  const { author, avatar, title, url } = req.body || {};
+  const { author, avatar, title, body: articleBody, url } = req.body || {};
   if (!author || !title) {
     return res.status(400).json({ error: "author and title are required" });
   }
@@ -244,6 +258,7 @@ app.post("/news", (req, res) => {
     author,
     avatar: avatar || "",
     title,
+    body: articleBody || "",
     url: url || "",
     createdAt: new Date().toISOString(),
   };
@@ -254,10 +269,11 @@ app.post("/news", (req, res) => {
 app.put("/news/:id", (req, res) => {
   const item = findNewsOr404(req, res);
   if (!item) return;
-  const { author, avatar, title, url } = req.body || {};
+  const { author, avatar, title, body: articleBody, url } = req.body || {};
   if (author !== undefined) item.author = author;
   if (avatar !== undefined) item.avatar = avatar;
   if (title !== undefined) item.title = title;
+  if (articleBody !== undefined) item.body = articleBody;
   if (url !== undefined) item.url = url;
   res.json(item);
 });
@@ -379,5 +395,5 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`News API running on http://localhost:${PORT}`);
+  console.log(`Skaet mock News API running on http://localhost:${PORT}`);
 });
